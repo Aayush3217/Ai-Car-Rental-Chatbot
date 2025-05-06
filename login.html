@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Car Rental Chatbot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      animation: gradientShift 15s ease infinite;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes gradientShift {
+      0% { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+      50% { background: linear-gradient(135deg, #16213e, #2a2a5e); }
+      100% { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    }
+
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.8;
+    }
+
+    .dashboard-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 221, 235, 0.1) 0%, transparent 70%);
+      z-index: -2;
+      animation: dashboardGlow 5s ease-in-out infinite;
+    }
+
+    @keyframes dashboardGlow {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease;
+      perspective: 1000px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .car-hologram {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1rem;
+      background: url('https://img.icons8.com/ios-filled/50/ffffff/car.png') no-repeat center;
+      background-size: contain;
+      animation: rotateHologram 10s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(0, 221, 235, 0.5));
+    }
+
+    @keyframes rotateHologram {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    .login-box h2 {
+      font-size: 2.5rem;
+      background: linear-gradient(45deg, #00ddeb, #1877f2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 1.2s ease-out 0.2s both;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: #1e1e2f;
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      animation: fadeIn 1.4s ease-out 0.4s both;
+    }
+
+    .login-box input:focus {
+      outline: none;
+      border-color: #00ddeb;
+      box-shadow: 0 0 15px rgba(0, 221, 235, 0.7);
+      background: #2a2a3f;
+      animation: neonPulse 1.5s infinite;
+    }
+
+    @keyframes neonPulse {
+      0%, 100% { border-color: #00ddeb; box-shadow: 0 0 15px rgba(0, 221, 235, 0.7); }
+      50% { border-color: #1877f2; box-shadow: 0 0 20px rgba(0, 221, 235, 0.9); }
+    }
+
+    .login-box input::placeholder {
+      color: #aaa;
+    }
+
+    .voice-prompt {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      background: url('https://img.icons8.com/ios-filled/50/ffffff/microphone.png') no-repeat center;
+      background-size: 20px;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+
+    .voice-prompt:hover {
+      opacity: 1;
+      animation: waveform 1s infinite;
+    }
+
+    @keyframes waveform {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #00ddeb, #1877f2);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 221, 235, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      animation: pulse 2s infinite, fadeIn 1.6s ease-out 0.6s both;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 221, 235, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(0, 221, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 221, 235, 0); }
+    }
+
+    .login-box button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 221, 235, 0.6);
+    }
+
+    .login-box button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    .login-box button:hover::before {
+      left: 100%;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #fff, transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkleFade 0.5s ease-out forwards;
+    }
+
+    @keyframes sparkleFade {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+
+    .shake {
+      animation: shake 0.5s ease-in-out, ripple 0.7s ease-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    @keyframes ripple {
+      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5); }
+      100% { box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <div class="dashboard-bg"></div>
+  <div class="login-box">
+    <div class="car-hologram"></div>
+    <h2>Car Rental Login</h2>
+    <div style="position: relative;">
+      <input type="text" id="username" placeholder="Username" required />
+      <div class="voice-prompt"></div>
+    </div>
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    // Particle.js initialization
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 60, density: { enable: true, value_area: 800 } },
+        color: { value: '#00ddeb' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: '#00ddeb',
+          opacity: 0.4,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: 'none',
+          random: false,
+          straight: false,
+          out_mode: 'out',
+          bounce: false
+        }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: {
+          onhover: { enable: true, mode: 'repulse' },
+          onclick: { enable: true, mode: 'push' },
+          resize: true
+        }
+      },
+      retina_detect: true
+    });
+
+    // 3D tilt effect
+    const loginBox = document.querySelector('.login-box');
+    loginBox.addEventListener('mousemove', (e) => {
+      const rect = loginBox.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const tiltX = (centerY - y) / 25;
+      const tiltY = (x - centerX) / 25;
+      loginBox.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    });
+
+    loginBox.addEventListener('mouseleave', () => {
+      loginBox.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+
+    // Sparkle effect on button hover
+    const button = document.querySelector('button');
+    button.addEventListener('mousemove', (e) => {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = `${e.offsetX}px`;
+      sparkle.style.top = `${e.offsetY}px`;
+      button.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 500);
+    });
+
+    // Login function with shake and ripple animation
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginBox = document.querySelector('.login-box');
+
+      if (username && password) {
+        localStorage.setItem("user", username);
+        window.location.href = "chatbot.html";
+      } else {
+        loginBox.classList.add('shake');
+        setTimeout(() => loginBox.classList.remove('shake'), 700);
+        alert("Please enter username and password.");
+      }
+    }
+  </script>
+</body>
+</html>

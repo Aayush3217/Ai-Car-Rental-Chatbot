@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Car Rental Chatbot</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      --text-color: #e0e0e0;
+      --chat-bg: rgba(255, 255, 255, 0.08);
+      --input-bg: #1a1a2e;
+      --input-placeholder: #ccc;
+      --footer-color: #aaa;
+      --registration-color: #888;
+      --scrollbar-track: rgba(255, 255, 255, 0.05);
+      --particle-color: rgba(0, 242, 254, 0.5);
+      --light-bg-gradient: linear-gradient(135deg, #e0e7ff, #c3d7ff, #d6e4ff);
+      --light-text-color: #1a1a2e;
+      --light-chat-bg: rgba(255, 255, 255, 0.9);
+      --light-input-bg: #ffffff;
+      --light-input-placeholder: #666;
+      --light-footer-color: #555;
+      --light-registration-color: #666;
+      --light-scrollbar-track: rgba(0, 0, 0, 0.1);
+      --light-particle-color: rgba(0, 114, 188, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      height: 100vh;
+      width: 100%;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+      text-align: center;
+      overflow-x: hidden;
+      animation: fadeIn 1s ease-in;
+      position: relative;
+    }
+
+    .background-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: var(--particle-color);
+      border-radius: 50%;
+      animation: float 10s infinite ease-in-out;
+      opacity: 0.5;
+    }
+
+    .particle:nth-child(2) { animation-delay: 2s; }
+    .particle:nth-child(3) { animation-delay: 4s; }
+    .particle:nth-child(4) { animation-delay: 6s; }
+    .particle:nth-child(5) { animation-delay: 8s; }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(45deg, #00ffe7, #7a00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      transition: transform 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .title:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #b0b3ff;
+      margin-bottom: 15px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+
+    .subtitle:hover {
+      opacity: 1;
+    }
+
+    .controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .theme-toggle, .voice-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .theme-toggle input, .voice-toggle input {
+      display: none;
+    }
+
+    .theme-toggle-label, .voice-toggle-label {
+      width: 50px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 50px;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    .theme-toggle-label::after, .voice-toggle-label::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle input:checked + .theme-toggle-label {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+    }
+
+    .theme-toggle input:checked + .theme-toggle-label::after {
+      transform: translateX(26px);
+    }
+
+    .voice-toggle input:checked + .voice-toggle-label {
+      background: linear-gradient(135deg, #ff6b6b, #ff2e63);
+    }
+
+    .voice-toggle input:checked + .voice-toggle-label::after {
+      transform: translateX(26px);
+    }
+
+    .voice-toggle-label.active {
+      animation: pulse 1.5s infinite;
+    }
+
+    .theme-toggle span, .voice-toggle span {
+      margin-left: 10px;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 800px;
+      height: 65vh;
+      background: var(--chat-bg);
+      backdrop-filter: blur(15px);
+      border-radius: 25px;
+      padding: 25px;
+      box-shadow: 0 8px 30px rgba(0, 255, 255, 0.15);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      position: relative;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .chat-container:hover {
+      box-shadow: 0 12px 40px rgba(0, 255, 255, 0.25);
+      transform: translateY(-5px);
+    }
+
+    .chat-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      border-radius: 10px;
+    }
+
+    .chat-box {
+      display: flex;
+      animation: slideIn 0.3s ease;
+      position: relative;
+    }
+
+    .chat-bubble {
+      padding: 16px 22px;
+      border-radius: 20px;
+      font-size: 15px;
+      max-width: 80%;
+      word-wrap: break-word;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .chat-bubble:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .user-chat {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #000;
+    }
+
+    .ai-chat {
+      align-self: flex-start;
+      background: linear-gradient(135deg, #8e2de2, #4a00e0);
+      color: #fff;
+    }
+
+    .booking-card, .tracking-card {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 90%;
+      text-align: left;
+      animation: popIn 0.5s ease-out;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .booking-card h3, .tracking-card h3 {
+      color: #00f2fe;
+      margin-bottom: 10px;
+    }
+
+    .booking-card p, .tracking-card p {
+      margin: 5px 0;
+      color: var(--text-color);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #1a1a2e;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      transition: width 0.5s ease;
+    }
+
+    .ascii-map {
+      font-family: monospace;
+      background: #1a1a2e;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      white-space: pre;
+      color: #00f2fe;
+    }
+
+    .sticker {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: url('https://img.icons8.com/emoji/48/000000/automobile.png') no-repeat center;
+      background-size: contain;
+      opacity: 0.7;
+      animation: bounceSticker 2s infinite ease-in-out;
+    }
+
+    .ai-chat .sticker {
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .user-chat .sticker {
+      right: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .typing-indicator {
+      display: none;
+      align-self: flex-start;
+      padding: 10px;
+    }
+
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--text-color);
+      border-radius: 50%;
+      margin: 0 3px;
+      animation: bounce 0.6s infinite alternate;
+    }
+
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .prompt-area {
+      margin-top: 25px;
+      display: flex;
+      width: 90%;
+      max-width: 800px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .prompt-area input {
+      flex-grow: 1;
+      padding: 16px 20px;
+      border: 2px solid transparent;
+      border-radius: 30px;
+      font-size: 16px;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--text-color);
+      transition: border 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .prompt-area input:focus {
+      border: 2px solid #00f2fe;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+
+    .prompt-area input::placeholder {
+      color: var(--input-placeholder);
+      opacity: 0.7;
+    }
+
+    .prompt-area button {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #000;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .prompt-area button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+    }
+
+    .prompt-area button:active {
+      transform: scale(0.95);
+      animation: bounceButton 0.2s ease;
+    }
+
+    .prompt-area button.loading::after {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #fff;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .footer, .registration {
+      margin-top: 15px;
+      font-size: 13px;
+      color: var(--footer-color);
+      transition: color 0.3s ease;
+    }
+
+    .footer:hover, .registration:hover {
+      color: #00f2fe;
+    }
+
+    .registration {
+      color: var(--registration-color);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-5px); }
+    }
+
+    @keyframes bounceButton {
+      0% { transform: scale(0.95); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes bounceSticker {
+      0%, 100% { transform: translateY(-50%) translateY(0); }
+      50% { transform: translateY(-50%) translateY(-10px); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0); opacity: 0.5; }
+      50% { transform: translate(20px, -50px); opacity: 0.8; }
+      100% { transform: translate(0, 0); opacity: 0.5; }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    body.light-mode {
+      --bg-gradient: var(--light-bg-gradient);
+      --text-color: var(--light-text-color);
+      --chat-bg: var(--light-chat-bg);
+      --input-bg: var(--light-input-bg);
+      --input-placeholder: var(--light-input-placeholder);
+      --footer-color: var(--light-footer-color);
+      --registration-color: var(--light-registration-color);
+      --scrollbar-track: var(--light-scrollbar-track);
+      --particle-color: var(--light-particle-color);
+    }
+
+    @media (max-width: 600px) {
+      .title { font-size: 28px; }
+      .subtitle { font-size: 14px; }
+      .chat-container { width: 95%; height: 70vh; padding: 15px; }
+      .chat-bubble { font-size: 14px; padding: 12px 18px; max-width: 85%; }
+      .booking-card, .tracking-card { padding: 15px; }
+      .prompt-area input { padding: 12px 15px; font-size: 14px; }
+      .prompt-area button { width: 45px; height: 45px; font-size: 18px; }
+      .controls { top: 15px; right: 15px; flex-direction: column; gap: 10px; }
+      .theme-toggle-label, .voice-toggle-label { width: 40px; height: 20px; }
+      .theme-toggle-label::after, .voice-toggle-label::after { width: 16px; height: 16px; top: 2px; left: 2px; }
+      .theme-toggle input:checked + .theme-toggle-label::after,
+      .voice-toggle input:checked + .voice-toggle-label::after { transform: translateX(20px); }
+      .sticker { width: 25px; height: 25px; }
+      .ascii-map { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-particles">
+    <div class="particle" style="left: 10%; top: 20%;"></div>
+    <div class="particle" style="left: 30%; top: 50%;"></div>
+    <div class="particle" style="left: 50%; top: 30%;"></div>
+    <div class="particle" style="left: 70%; top: 60%;"></div>
+    <div class="particle" style="left: 90%; top: 40%;"></div>
+  </div>
+  <div class="controls">
+    <div class="theme-toggle">
+      <input type="checkbox" id="theme-toggle" />
+      <label for="theme-toggle" class="theme-toggle-label"></label>
+      <span>Toggle Theme</span>
+    </div>
+    <div class="voice-toggle">
+      <input type="checkbox" id="voice-toggle" checked />
+      <label for="voice-toggle" class="voice-toggle-label active"></label>
+      <span>Voice Reader</span>
+    </div>
+  </div>
+  <h1 class="title">AI Car Rental Chatbot</h1>
+  <p class="subtitle">Book, modify, cancel, or track your car rental with ease</p>
+  <div class="chat-container" id="chat">
+    <div class="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <div class="prompt-area">
+    <input type="text" id="prompt" placeholder="Type your message (e.g., book a car, track CAR-1, check location CAR-1)..." />
+    <button id="submit">→</button>
+  </div>
+  <p class="footer">Powered by xAI</p>
+  <p class="registration">Need help? Contact us at support@carrental.ai</p>
+
+  <script>
+    const chatContainer = document.getElementById("chat");
+    const promptInput = document.getElementById("prompt");
+    const submitBtn = document.getElementById("submit");
+    const themeToggle = document.getElementById("theme-toggle");
+    const voiceToggle = document.getElementById("voice-toggle");
+    const voiceToggleLabel = document.querySelector(".voice-toggle-label");
+
+    const Api_Url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBJvhPW1ZSldEsWcGoNwgN4LuarfBPtnXY";
+
+    const cars = [
+      { name: "Honda Civic", type: "Sedan", price: 45, available: true },
+      { name: "Toyota Fortuner", type: "SUV", price: 75, available: true },
+      { name: "Tesla Model 3", type: "Electric", price: 90, available: true },
+      { name: "Hyundai i20", type: "Hatchback", price: 40, available: true },
+    ];
+
+    const locations = {
+      "New York Airport": { lat: 40.6413, lon: -73.7781 },
+      "Los Angeles Station": { lat: 34.0551, lon: -118.2351 },
+      "Chicago Downtown": { lat: 41.8781, lon: -87.6298 },
+      "Miami Beach": { lat: 25.7907, lon: -80.1300 }
+    };
+
+    const bookings = [];
+    let bookingStep = null;
+    let bookingData = {};
+    let carTypeSelection = false;
+    let carNameSelection = false;
+    let modifyBooking = false;
+    let bookingID = 0;
+    let isVoiceEnabled = voiceToggle.checked;
+
+    function setTheme(theme) {
+      if (theme === "light") {
+        document.body.classList.add("light-mode");
+        themeToggle.checked = true;
+      } else {
+        document.body.classList.remove("light-mode");
+        themeToggle.checked = false;
+      }
+      localStorage.setItem("theme", theme);
+    }
+
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+
+    themeToggle.addEventListener("change", () => {
+      setTheme(themeToggle.checked ? "light" : "dark");
+    });
+
+    function speak(text) {
+      if (!isVoiceEnabled) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.volume = 1;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      const voices = speechSynthesis.getVoices();
+      const preferredVoice = voices.find(voice => voice.lang === "en-US") || voices[0];
+      if (preferredVoice) utterance.voice = preferredVoice;
+      speechSynthesis.speak(utterance);
+    }
+
+    voiceToggle.addEventListener("change", () => {
+      isVoiceEnabled = voiceToggle.checked;
+      voiceToggleLabel.classList.toggle("active", isVoiceEnabled);
+      localStorage.setItem("voiceEnabled", isVoiceEnabled);
+    });
+
+    const savedVoiceEnabled = localStorage.getItem("voiceEnabled") === "true";
+    isVoiceEnabled = savedVoiceEnabled;
+    voiceToggle.checked = savedVoiceEnabled;
+    if (savedVoiceEnabled) voiceToggleLabel.classList.add("active");
+
+    speechSynthesis.onvoiceschanged = () => {};
+
+    function appendMessage(message, sender = "ai") {
+      const chatBox = document.createElement("div");
+      chatBox.classList.add("chat-box");
+      const bubble = document.createElement("div");
+      bubble.classList.add("chat-bubble", sender === "user" ? "user-chat" : "ai-chat");
+      bubble.textContent = message;
+      const sticker = document.createElement("div");
+      sticker.classList.add("sticker");
+      chatBox.appendChild(sticker);
+      chatBox.appendChild(bubble);
+      chatContainer.appendChild(chatBox);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (sender === "ai" && isVoiceEnabled) speak(message);
+    }
+
+    function appendBookingCard(booking) {
+      const chatBox = document.createElement("div");
+      chatBox.classList.add("chat-box", "booking-card");
+      chatBox.innerHTML = `
+        <h3>Booking Details</h3>
+        <p>Booking ID: ${booking.bookingID}</p>
+        <p>Car: ${booking.car}</p>
+        <p>Pickup: ${booking.pickup}</p>
+        <p>Drop: ${booking.drop}</p>
+        <p>Date: ${booking.date}</p>
+        <p>Time: ${booking.time}</p>
+        <p>Duration: ${booking.duration} day${booking.duration > 1 ? 's' : ''}</p>
+        <p>Total Cost: $${booking.totalCost}</p>
+      `;
+      chatContainer.appendChild(chatBox);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (isVoiceEnabled) {
+        const summary = `Booking ${booking.bookingID} confirmed for ${booking.car}. Pickup at ${booking.pickup}, drop at ${booking.drop}, on ${booking.date} at ${booking.time}. Duration: ${booking.duration} days, total cost: $${booking.totalCost}.`;
+        speak(summary);
+      }
+    }
+
+    function appendTrackingCard(booking, status, progress, eta, location, coordinates) {
+      const chatBox = document.createElement("div");
+      chatBox.classList.add("chat-box", "tracking-card");
+      const asciiMap = `
+        [${booking.pickup}] ----> [${location}] ----> [${booking.drop}]
+        ${status === "In Use" ? "        🚗" : status.includes("Pickup") ? "🚗" : "        🚗"}
+      `;
+      chatBox.innerHTML = `
+        <h3>Tracking Status</h3>
+        <p>Booking ID: ${booking.bookingID}</p>
+        <p>Car: ${booking.car}</p>
+        <p>Status: ${status}</p>
+        <p>Current Location: ${location}</p>
+        <p>Coordinates: ${coordinates.lat}, ${coordinates.lon}</p>
+        <p>ETA: ${eta}</p>
+        <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
+        <pre class="ascii-map">${asciiMap}</pre>
+      `;
+      chatContainer.appendChild(chatBox);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      if (isVoiceEnabled) {
+        const summary = `Tracking for Booking ${booking.bookingID}. Your ${booking.car} is ${status} at ${location}. Estimated time: ${eta}.`;
+        speak(summary);
+      }
+    }
+
+    function listCarsByType(type) {
+      return cars.filter(car => car.type.toLowerCase() === type.toLowerCase() && car.available)
+                .map(car => `${car.name} - $${car.price}/day${car.available ? '' : ' (Unavailable)'}`)
+                .join("\n");
+    }
+
+    function listAllCarTypes() {
+      return [...new Set(cars.map(car => car.type))].join(", ");
+    }
+
+    function getCarByName(name) {
+      return cars.find(car => car.name.toLowerCase() === name.toLowerCase());
+    }
+
+    function checkAvailability(date) {
+      return cars.filter(car => car.available).map(car => `${car.name} (${car.type}) - $${car.price}/day`).join("\n");
+    }
+
+    function trackCar(booking) {
+      const now = new Date();
+      const bookingDateTime = new Date(`${booking.date}T${booking.time}`);
+      const endDate = new Date(bookingDateTime);
+      endDate.setDate(endDate.getDate() + parseInt(booking.duration));
+
+      let status, progress, eta, location, coordinates;
+
+      if (now < bookingDateTime) {
+        const timeDiff = (bookingDateTime - now) / (1000 * 60); // Minutes until pickup
+        if (timeDiff > 60) {
+          status = "Preparing at Pickup Location";
+          progress = 25;
+          location = booking.pickup;
+          coordinates = locations[booking.pickup] || { lat: 0, lon: 0 };
+          eta = `Ready on ${booking.date} at ${booking.time}`;
+        } else {
+          status = "En Route to Pickup";
+          progress = 50;
+          location = `Between Depot and ${booking.pickup}`;
+          coordinates = interpolateCoordinates(booking.pickup, booking.drop, 0.25);
+          eta = `Arriving in ~${Math.round(timeDiff)} minutes`;
+        }
+      } else if (now >= bookingDateTime && now < endDate) {
+        status = "In Use";
+        progress = 75;
+        location = `Between ${booking.pickup} and ${booking.drop}`;
+        coordinates = interpolateCoordinates(booking.pickup, booking.drop, 0.5);
+        eta = `Drop-off on ${endDate.toISOString().split('T')[0]} at ${booking.time}`;
+      } else {
+        status = "Returned";
+        progress = 100;
+        location = booking.drop;
+        coordinates = locations[booking.drop] || { lat: 0, lon: 0 };
+        eta = "Booking completed";
+      }
+
+      return { status, progress, eta, location, coordinates };
+    }
+
+    function interpolateCoordinates(start, end, fraction) {
+      const startCoords = locations[start] || { lat: 0, lon: 0 };
+      const endCoords = locations[end] || { lat: 0, lon: 0 };
+      return {
+        lat: startCoords.lat + (endCoords.lat - startCoords.lat) * fraction,
+        lon: startCoords.lon + (endCoords.lon - startCoords.lon) * fraction
+      };
+    }
+
+    function detectBookingIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("book") || lower.includes("rent a car") || lower.includes("i need a car");
+    }
+
+    function detectModifyIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("modify") || lower.includes("change booking") || lower.includes("update booking");
+    }
+
+    function detectCancelIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("cancel") || lower.includes("delete booking");
+    }
+
+    function detectAvailabilityIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("availability") || lower.includes("available on") || lower.includes("check cars");
+    }
+
+    function detectHistoryIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("my bookings") || lower.includes("booking history") || lower.includes("show bookings");
+    }
+
+    function detectTrackingIntent(msg) {
+      const lower = msg.toLowerCase();
+      return lower.includes("track") || lower.includes("status") || lower.includes("where is my car") || lower.includes("check location");
+    }
+
+    async function generateAIResponse(message) {
+      const requestBody = {
+        contents: [{ role: "user", parts: [{ text: message }] }],
+        system_instruction: {
+          role: "system",
+          parts: [{ text: `You are an AI assistant for a car rental service. Help users with bookings, prices, availability, modifications, cancellations, tracking, and location checking.` }]}
+      };
+      try {
+        const res = await fetch(Api_Url, {
+          method: "POST",
+          headers: { "Content-Language": "en-US", "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        });
+        const data = await res.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "🤖 Sorry, I couldn't generate a response.";
+      } catch {
+        return "❌ Something went wrong.";
+      }
+    }
+
+    function generateBookingID() {
+      bookingID++;
+      return `CAR-${bookingID}`;
+    }
+
+    async function handleMessage(input) {
+      appendMessage(input, "user");
+      const typingIndicator = document.querySelector(".typing-indicator");
+
+      if (carTypeSelection) {
+        if (["sedan", "suv", "hatchback", "electric"].includes(input.toLowerCase())) {
+          bookingData.carType = input;
+          carTypeSelection = false;
+          carNameSelection = true;
+          appendMessage(`🚘 Available ${input} cars:\n\n${listCarsByType(input)}\n\nPlease select a car (e.g., Honda Civic).`);
+        } else {
+          appendMessage("🚗 Sorry, we don't have that type. Please choose from Sedan, SUV, Hatchback, or Electric.");
+        }
+        return;
+      }
+
+      if (carNameSelection) {
+        const selectedCar = getCarByName(input);
+        if (selectedCar && selectedCar.available) {
+          bookingData.car = selectedCar.name;
+          bookingData.price = selectedCar.price;
+          carNameSelection = false;
+          bookingStep = "pickup";
+          appendMessage(`🚗 You've selected the ${selectedCar.name}. Where would you like to pick up the car?`);
+        } else {
+          appendMessage("🚗 Sorry, that car is not available or doesn't exist. Please choose from:\n\n" + listCarsByType(bookingData.carType));
+        }
+        return;
+      }
+
+      if (bookingStep === "pickup") {
+        bookingData.pickup = input;
+        bookingStep = "drop";
+        appendMessage("📍 Where would you like to drop the car?");
+        return;
+      }
+
+      if (bookingStep === "drop") {
+        bookingData.drop = input;
+        bookingStep = "date";
+        appendMessage("📅 Please enter the date for the booking (e.g., 2025-05-01):");
+        return;
+      }
+
+      if (bookingStep === "date") {
+        bookingData.date = input;
+        bookingStep = "time";
+        appendMessage("⏰ Please enter the time (e.g., 10:00 AM):");
+        return;
+      }
+
+      if (bookingStep === "time") {
+        bookingData.time = input;
+        bookingStep = "duration";
+        appendMessage("🕒 How many days would you like to rent the car for?");
+        return;
+      }
+
+      if (bookingStep === "duration") {
+        const duration = parseInt(input);
+        if (isNaN(duration) || duration <= 0) {
+          appendMessage("⚠️ Please enter a valid number of days (e.g., 3).");
+          return;
+        }
+        bookingData.duration = duration;
+        bookingData.totalCost = bookingData.price * duration;
+        bookingStep = null;
+        const id = generateBookingID();
+        const booking = { ...bookingData, bookingID: id };
+        bookings.push(booking);
+        appendMessage("✅ Booking Confirmed!");
+        appendBookingCard(booking);
+        bookingData = {};
+        return;
+      }
+
+      if (detectTrackingIntent(input)) {
+        const idMatch = input.match(/CAR-\d+/i);
+        if (idMatch) {
+          const id = idMatch[0].toUpperCase();
+          const booking = bookings.find(b => b.bookingID === id);
+          if (booking) {
+            const { status, progress, eta, location, coordinates } = trackCar(booking);
+            appendTrackingCard(booking, status, progress, eta, location, coordinates);
+          } else {
+            appendMessage(`⚠️ Booking ID ${id} not found. Please provide a valid ID.`);
+          }
+        } else {
+          appendMessage("⚠️ Please include the Booking ID (e.g., track CAR-1 or check location CAR-1) to track your car.");
+        }
+        return;
+      }
+
+      if (detectAvailabilityIntent(input)) {
+        const dateMatch = input.match(/\d{4}-\d{2}-\d{2}/);
+        const date = dateMatch ? dateMatch[0] : "today";
+        appendMessage(`🚗 Available cars for ${date}:\n\n${checkAvailability(date)}`);
+        return;
+      }
+
+      if (detectModifyIntent(input)) {
+        const idMatch = input.match(/CAR-\d+/i);
+        if (idMatch) {
+          const id = idMatch[0].toUpperCase();
+          const booking = bookings.find(b => b.bookingID === id);
+          if (booking) {
+            modifyBooking = id;
+            bookingStep = "modify-field";
+            appendMessage(`✏️ Modifying Booking ${id}. What would you like to change? (e.g., pickup, drop, date, time, duration, car)`);
+          } else {
+            appendMessage(`⚠️ Booking ID ${id} not found. Please provide a valid ID.`);
+          }
+        } else {
+          appendMessage("⚠️ Please include the Booking ID (e.g., CAR-1) to modify.");
+        }
+        return;
+      }
+
+      if (bookingStep === "modify-field") {
+        const field = input.toLowerCase();
+        if (["pickup", "drop", "date", "time", "duration", "car"].includes(field)) {
+          bookingStep = `modify-${field}`;
+          if (field === "car") {
+            carTypeSelection = true;
+            appendMessage("🚗 What type of car would you like? (Sedan, SUV, Hatchback, Electric)");
+          } else {
+            appendMessage(`✏️ Please enter the new ${field} for Booking ${modifyBooking}.`);
+          }
+        } else {
+          appendMessage("⚠️ Please choose a valid field to modify: pickup, drop, date, time, duration, or car.");
+        }
+        return;
+      }
+
+      if (bookingStep?.startsWith("modify-")) {
+        const field = bookingStep.split("-")[1];
+        const booking = bookings.find(b => b.bookingID === modifyBooking);
+        if (field === "car") {
+          const selectedCar = getCarByName(input);
+          if (selectedCar && selectedCar.available) {
+            booking.car = selectedCar.name;
+            booking.price = selectedCar.price;
+            booking.totalCost = booking.price * booking.duration;
+            bookingStep = null;
+            modifyBooking = false;
+            appendMessage(`✅ Booking ${booking.bookingID} updated!`);
+            appendBookingCard(booking);
+          } else {
+            appendMessage("🚗 Sorry, that car is not available or doesn't exist. Please choose from:\n\n" + listCarsByType(bookingData.carType || "Sedan"));
+          }
+        } else if (field === "duration") {
+          const duration = parseInt(input);
+          if (isNaN(duration) || duration <= 0) {
+            appendMessage("⚠️ Please enter a valid number of days (e.g., 3).");
+            return;
+          }
+          booking[field] = input;
+          booking.totalCost = booking.price * duration;
+          bookingStep = null;
+          modifyBooking = false;
+          appendMessage(`✅ Booking ${booking.bookingID} updated!`);
+          appendBookingCard(booking);
+        } else {
+          booking[field] = input;
+          bookingStep = null;
+          modifyBooking = false;
+          appendMessage(`✅ Booking ${booking.bookingID} updated!`);
+          appendBookingCard(booking);
+        }
+        return;
+      }
+
+      if (detectCancelIntent(input)) {
+        const idMatch = input.match(/CAR-\d+/i);
+        if (idMatch) {
+          const id = idMatch[0].toUpperCase();
+          const index = bookings.findIndex(b => b.bookingID === id);
+          if (index !== -1) {
+            bookings.splice(index, 1);
+            appendMessage(`🗑️ Booking ${id} has been cancelled.`);
+          } else {
+            appendMessage(`⚠️ Booking ID ${id} not found.`);
+          }
+        } else {
+          appendMessage("⚠️ Please include the Booking ID (e.g., CAR-1) to cancel.");
+        }
+        return;
+      }
+
+      if (detectHistoryIntent(input)) {
+        if (bookings.length === 0) {
+          appendMessage("📜 You have no bookings yet.");
+        } else {
+          appendMessage("📜 Your Booking History:");
+          bookings.forEach(booking => appendBookingCard(booking));
+        }
+        return;
+      }
+
+      if (input.toLowerCase().includes("available cars") || input.toLowerCase().includes("show cars")) {
+        appendMessage("🚗 Available cars:\n\n" + listCarsByType("sedan") + "\n" + listCarsByType("suv") + "\n" + listCarsByType("hatchback") + "\n" + listCarsByType("electric"));
+        return;
+      }
+
+      if (detectBookingIntent(input)) {
+        carTypeSelection = true;
+        appendMessage("🚗 What type of car do you need? (Sedan, SUV, Hatchback, Electric)");
+        return;
+      }
+
+      typingIndicator.style.display = "flex";
+      submitBtn.classList.add("loading");
+      submitBtn.disabled = true;
+
+      const aiResponse = await generateAIResponse(input);
+
+      typingIndicator.style.display = "none";
+      submitBtn.classList.remove("loading");
+      submitBtn.disabled = false;
+
+      appendMessage(aiResponse, "ai");
+    }
+
+    submitBtn.addEventListener("click", () => {
+      const input = promptInput.value.trim();
+      if (input) {
+        handleMessage(input);
+        promptInput.value = "";
+      }
+    });
+
+    promptInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const input = promptInput.value.trim();
+        if (input) {
+          handleMessage(input);
+          promptInput.value = "";
+        }
+      }
+    });
+
+    appendMessage("🚗 Welcome to the AI Car Rental Chatbot! You can book a car, check availability, modify, cancel, or track your car’s location by booking ID. How can I assist you today?");
+  </script>
+</body>
+</html>
